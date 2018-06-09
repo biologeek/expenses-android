@@ -23,7 +23,7 @@ public class UserInformationRepository implements CrudRepository<UserInformation
     private SQLiteDatabase db;
 
     public UserInformationRepository(Context ctx){
-        this.db = DatabaseHelper.getInstance(ctx;
+        this.db = DatabaseHelper.getInstance(ctx).getWritableDatabase();
     }
     protected UserInformation toObject(Cursor cursor) {
         UserInformation res = new UserInformation();
