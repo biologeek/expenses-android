@@ -46,18 +46,18 @@ public class OperationAdapter extends android.widget.ArrayAdapter<Operation> {
         TextView subCategory = view.findViewById(R.id.subcategory);
 
         Operation currentOperation = objects[position];
-        if (currentOperation.getCategory().getPicture() == null)
+        if (currentOperation.getCategory() == null || currentOperation.getCategory().getPictureId() == 0)
             image.setImageResource(DEFAULT_CATEGORY_PICTURE);
         else
-            image.setImageResource(currentOperation.getCategory().getPicture());
+            image.setImageResource(currentOperation.getCategory().getPictureId());
 
-        amount.setText(currentOperation.getAmount().toString());
-        date.setText(DATE_PARSER.format(currentOperation.getEffectiveDate()));
-
-        if (currentOperation.getNomenclature().size() > 1)
-            subCategory.setText(currentOperation.getNomenclature().get(1).getName());
-        category.setText(currentOperation.getNomenclature().get(0).getName());
-
+        amount.setText(currentOperation.getAmount() == null ? "0" : currentOperation.getAmount().toString());
+        date.setText(currentOperation.getEffectiveDate() == null ? "" : DATE_PARSER.format(currentOperation.getEffectiveDate()));
+        if (currentOperation.getNomenclature() != null) {
+            if (currentOperation.getNomenclature().size() > 1)
+                subCategory.setText(currentOperation.getNomenclature().get(1).getName());
+            category.setText(currentOperation.getNomenclature().get(0).getName());
+        }
         return view;
     }
 }

@@ -1,7 +1,13 @@
 package io.biologeek.expenses.api;
 
+import android.content.Context;
+import android.content.Intent;
+
 import java.io.IOException;
 
+import io.biologeek.expenses.OperationListActivity;
+import io.biologeek.expenses.beans.UserInformation;
+import io.biologeek.expenses.repositories.UserInformationRepository;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -12,22 +18,34 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 /**
  * Created by xavier on 02/06/18.
  */
+public class AbstractAPI {
+    protected String apiUrl = "http://51.15.176.183:8090/expenses/";
 
-public abstract class AbstractAPI {
-    protected static String apiUrl = "http://:8080/expenses/";
+    protected String apiSubPath = "";
+    private boolean authenticated = false;
 
-    protected static String apiSubPath = "";
+    protected String sessionToken;
+    protected String userId;
 
-    protected static String sessionToken;
-    protected static String userId;
+    private Retrofit client;
+    private Context ctx;
+    private UserInformationRepository repository;
 
-    private static Retrofit client;
-
+    public AbstractAPI(boolean authenticated){
+        this.authenticated = authenticated;
+    }
     /**
      * Creates an instance of Retrofit client if not instantiated yet
      * @return
      */
-    public static  Retrofit buildHttpClient(){
+    public Retrofit buildHttpClient(Context ctxt){
+        ctx = ctxt;
+        this.repository = new UserInformationRepository(ctxt);
+        UserInformation info = repository.getCurrent();
+        if (info != null) {
+            this.sessionToken = info.getToken();
+            this.userId = String.valueOf(info.getId());
+        }
         if (client == null)
             client = new Retrofit.Builder()
                 .baseUrl(apiUrl+apiSubPath)
@@ -41,19 +59,40 @@ public abstract class AbstractAPI {
      * Adds an interceptor for requests
      * @return
      */
-    protected static OkHttpClient okHttp(){
+    protected OkHttpClient okHttp(){
+
         return new OkHttpClient().newBuilder().addInterceptor(new Interceptor() {
             @Override
             public Response intercept(Chain chain) throws IOException {
                 Request.Builder request = chain.request()
                         .newBuilder();
-                        if (sessionToken != null && userId != null)
-                            request.addHeader("Authorization", sessionToken)
-                                    .addHeader("user", userId);
-
+                        if (authenticated) {
+                            if (sessionToken != null && userId != null) {
+                                request.addHeader("Authorization", sessionToken)
+                                        .addHeader("user", userId);
+                            } else {
+                                Intent goToLogin = new Intent(ctx, OperationListActivity.class);
+                                ctx.startActivity(goToLogin);
+                            }
+                        }
                 return chain.proceed(request.build());
             }
         }).build();
     }
 
+    public String getSessionToken() {
+        return sessionToken;
+    }
+
+    public void setSessionToken(String sessionToken) {
+        this.sessionToken = sessionToken;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 }

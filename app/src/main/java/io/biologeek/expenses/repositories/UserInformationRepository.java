@@ -1,14 +1,12 @@
 package io.biologeek.expenses.repositories;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.widget.TextView;
 
 import java.util.List;
 
-import io.biologeek.expenses.api.beans.Operation;
-import io.biologeek.expenses.api.beans.User;
 import io.biologeek.expenses.beans.UserInformation;
 import io.biologeek.expenses.config.DatabaseHelper;
 
@@ -27,17 +25,22 @@ public class UserInformationRepository implements CrudRepository<UserInformation
     }
     protected UserInformation toObject(Cursor cursor) {
         UserInformation res = new UserInformation();
-        res.setId(cursor.getInt(0));
-        res.setName(cursor.getString(1));
-        res.setSurname(cursor.getString(2));
-        res.setToken(cursor.getString(3));
+        if (cursor.getCount() == 0)
+            return null;
+        if (cursor.moveToFirst()){
+            res.setId(cursor.getInt(cursor.getColumnIndex("id")));
+            res.setName(cursor.getString(cursor.getColumnIndex("name")));
+            res.setSurname(cursor.getString(cursor.getColumnIndex("surname")));
+            res.setToken(cursor.getString(cursor.getColumnIndex("token")));
 
+            return res;
+        }
         return null;
     }
 
     @Override
     public UserInformation get(Integer id) {
-        String query = "SELECT * FROM "+ TABLE_NAME
+        String query = "SELECT id, name, surname, token FROM "+ TABLE_NAME
                 +" WHERE id = "+id;
         Cursor cursor = db.rawQuery(query, null);
         return toObject(cursor);
@@ -50,11 +53,36 @@ public class UserInformationRepository implements CrudRepository<UserInformation
 
     @Override
     public UserInformation save(UserInformation toSave) {
-        return null;
+        if (toSave.getId() != 0) {
+            if (get(toSave.getId()) != null){
+                return update(toSave);
+            }
+        }
+        ContentValues values = new ContentValues();
+        values.put("id", toSave.getId());
+        values.put("name", toSave.getName());
+        values.put("surname", toSave.getSurname());
+        values.put("token", toSave.getToken());
+
+        Long id = db.insertOrThrow(TABLE_NAME, null, values);
+
+        return get(id.intValue());
     }
 
     @Override
     public UserInformation update(UserInformation toSave) {
-        return null;
+        ContentValues values = new ContentValues();
+        values.put("name", toSave.getName());
+        values.put("surname", toSave.getSurname());
+        values.put("token", toSave.getToken());
+        int id = db.update(TABLE_NAME, values, "id = " + toSave.getId(), null);
+        return get(id);
+    }
+
+    public UserInformation getCurrent() {
+        String query = "SELECT id, name, surname, token FROM "+ TABLE_NAME
+                +" LIMIT 1";
+        Cursor cursor = db.rawQuery(query, null);
+        return toObject(cursor);
     }
 }
