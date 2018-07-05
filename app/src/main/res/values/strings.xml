@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Expenses</string>
-    <string name="title_activity_operation_list">OperationListActivity</string>
+    <string name="title_activity_operation_list">Liste</string>
+    <string name="title_activity_dashboard">Dashboard</string>
 </resources>

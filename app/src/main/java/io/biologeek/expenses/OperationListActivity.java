@@ -4,7 +4,13 @@ import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.Arrays;
@@ -20,11 +26,12 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class OperationListActivity extends ListActivity implements SwipeRefreshLayout.OnRefreshListener {
+public class OperationListActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
 
     OperationAPI operationAPI;
     private Operation[] operationList;
     private SwipeRefreshLayout swipeLayout;
+    private ListView mListView;
 
     public OperationListActivity(){
     }
@@ -32,10 +39,20 @@ public class OperationListActivity extends ListActivity implements SwipeRefreshL
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_operation_list);
+        mListView = findViewById(R.id.list);
+        ((TextView) findViewById(R.id.activityTitle)).setText(R.string.title_activity_operation_list);
         this.operationAPI = new AbstractAPI(true).buildHttpClient(getApplicationContext()).create(OperationAPI.class);
 
-        swipeLayout = (SwipeRefreshLayout) findViewById(R.id.swipeLayout);
-        swipeLayout.setOnRefreshListener(this);
+        ImageView previousActivity = findViewById(R.id.previousActivityImage);
+        previousActivity.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent goToDashboard = new Intent(OperationListActivity.this, DashboardActivity.class);
+                startActivity(goToDashboard);
+            }
+        });
+
+        //swipeLayout.setOnRefreshListener(this);
         
 
         Call<PaginatedOperationsList> opCall = operationAPI.getPaginatedOperationList(1, 0, 50, "id", true);
@@ -49,7 +66,7 @@ public class OperationListActivity extends ListActivity implements SwipeRefreshL
                 if (response.isSuccessful() && response.body() != null){
                     Object[] objArray = response.body().getOperations().toArray();
                     operationList = Arrays.copyOf(objArray, objArray.length, Operation[].class);
-                    setListAdapter(new OperationAdapter(OperationListActivity.this, (Operation[]) operationList));
+                    mListView.setAdapter(new OperationAdapter(OperationListActivity.this, (Operation[]) operationList));
                 } else if (response.code() == 401){
                     Intent goBackToLogin = new Intent(OperationListActivity.this, LoginActivity.class);
                     Bundle bundle = new Bundle();

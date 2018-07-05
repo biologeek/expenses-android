@@ -1,6 +1,7 @@
 package io.biologeek.expenses.adapters;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -49,7 +50,7 @@ public class OperationAdapter extends android.widget.ArrayAdapter<Operation> {
         if (currentOperation.getCategory() == null || currentOperation.getCategory().getPictureId() == 0)
             image.setImageResource(DEFAULT_CATEGORY_PICTURE);
         else
-            image.setImageResource(currentOperation.getCategory().getPictureId());
+            image.setImageDrawable(context.getResources().getDrawable(currentOperation.getCategory().getPictureId(), context.getTheme()));
 
         amount.setText(currentOperation.getAmount() == null ? "0" : currentOperation.getAmount().toString());
         date.setText(currentOperation.getEffectiveDate() == null ? "" : DATE_PARSER.format(currentOperation.getEffectiveDate()));

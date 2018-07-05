@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_one"
+        android:enabled="true"
+        android:icon="@drawable/ic_previous_activity"
+        android:orderInCategory="0"
+        android:title="Previous"
+        android:visible="true"
+
+        app:showAsAction="always"></item>
+</menu>
